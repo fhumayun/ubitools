@@ -1,0 +1,35 @@
+#!/bin/bash
+
+# Reads servername.txt for MQTT server URL and assigns string to variable "server"
+# Echo eui_list.txt
+# Asks user to continue
+# If answer is "Y" or "y" then perform reboot, else exit
+# Clears schedules for all EUI in eui_list.txt
+# eui_list.txt is whitespace separated, empty new lines (/r/n) cause errors
+
+ota=$(cat otaserver.txt)
+server=$(cat servername.txt)
+echo "Update will point to the MQTT broker at: "$server
+echo "The following Dev EUI will be processed: "$(cat eui_list.txt)
+echo "The OTA server is set to: "$ota
+echo -n "Are you sure? (y/n)"
+read answer
+if [ "$answer" != "${answer#[Yy]}" ] ;then
+	while read EUI; do
+	echo $EUI
+	#DATA="t:98,d:http://updsw.ubicquia.com"	
+	DATA="t:98,d:${ota}"	
+	DATA_B64=`echo ${DATA} | base64`
+	export LC_CTYPE=C
+	REF=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 8 | head -n 1)
+	echo ${DATA}
+	# echo ${DATA_B64}
+	echo "OTA Update being pushed via $server"
+	mosquitto_pub -t "ubicell/${EUI}/tx" -m "{\"payload\": \"$DATA_B64\"}" --id $REF -q 1 -h $server -p 1883 -u test -P test
+       	sleep 1
+	done < eui_list.txt
+	echo "OTA Update Complete"
+else
+	echo "OTA Update Terminated"
+	exit
+fi
