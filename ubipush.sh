@@ -7,7 +7,7 @@
 # Clears schedules for all EUI in eui_list.txt
 # eui_list.txt is whitespace separated, empty new lines (/r/n) cause errors
 
-server=$(cat servername.txt)
+mqttserver=$(cat mqtt-servername.txt)
 #cust_id="19750"
 #configserver="mqtt.${cust_id}.ubicquia.com"
 configserver=$1
@@ -23,7 +23,7 @@ mqtt_payload_custid(){
 	REF=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 8 | head -n 1)
 	echo ${DATA}
 	# echo ${DATA_B64}
-	mosquitto_pub -t "ubicell/${EUI}/tx" -m "{\"payload\": \"$DATA_B64\"}" --id $REF -q 1 -h $server -p 1883 -u test -P test
+	mosquitto_pub -t "ubicell/${EUI}/tx" -m "{\"payload\": \"$DATA_B64\"}" --id $REF -q 1 -h $mqttserver -p 1883 -u test -P test
 }
 mqtt_payload_redirect_node(){
 	local bid="$1"
@@ -37,7 +37,7 @@ mqtt_payload_redirect_node(){
 	REF=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 8 | head -n 1)
 	echo ${DATA}
 	# echo ${DATA_B64}
-	mosquitto_pub -t "ubicell/${EUI}/tx" -m "{\"payload\": \"$DATA_B64\"}" --id $REF -q 1 -h $server -p 1883 -u test -P test
+	mosquitto_pub -t "ubicell/${EUI}/tx" -m "{\"payload\": \"$DATA_B64\"}" --id $REF -q 1 -h $mqttserver -p 1883 -u test -P test
 }
 
 echo "Update will point to the MQTT broker at: "$1
